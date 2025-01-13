@@ -1,0 +1,291 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: Twitter-like Application API
+  description: API documentation for Twitter-like application backend.
+host: localhost:8080
+basePath: /api
+schemes:
+  - http
+
+paths:
+  /users/register:
+    post:
+      summary: Register a new user
+      tags:
+        - User Management Service
+      parameters:
+        - in: body
+          name: body
+          description: User registration data
+          required: true
+          schema:
+            $ref: '#/definitions/UserRegistration'
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Bad request
+          
+  /users/roles:
+    post:
+      summary: Assign roles for user
+      tags:
+        - User Management Service
+      parameters:
+        - in: body
+          name: body
+          description: User role data
+          required: true
+          schema:
+            $ref: '#/definitions/SetUserRole'
+      responses:
+        '201':
+          description: User role set successfully
+        '400':
+          description: Bad request
+
+  /users/login:
+    post:
+      summary: Login a user
+      tags:
+        - User Management Service
+      parameters:
+        - in: body
+          name: body
+          description: User login data
+          required: true
+          schema:
+            $ref: '#/definitions/UserLogin'
+      responses:
+        '200':
+          description: User logged in successfully
+          schema:
+            $ref: '#/definitions/Token'
+        '401':
+          description: Unauthorized
+
+  /messages:
+    post:
+      summary: Create a new message
+      tags:
+        - Message Service
+      parameters:
+        - in: body
+          name: body
+          description: Message data
+          required: true
+          schema:
+            $ref: '#/definitions/Message'
+      responses:
+        '201':
+          description: Message created successfully
+        '401':
+          description: Unauthorized
+
+    get:
+      summary: Get all messages
+      tags:
+        - Message Service
+      responses:
+        '200':
+          description: A list of all messages
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Message'
+
+  /messages/user/{userId}:
+    get:
+      summary: Get messages by user ID
+      tags:
+        - Message Service
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: integer
+          description: ID of the user
+      responses:
+        '200':
+          description: A list of messages by the user
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Message'
+        '404':
+          description: User not found
+
+  /messages/search:
+    get:
+      summary: Search messages by content
+      tags:
+        - Message Service
+      parameters:
+        - name: content
+          in: query
+          required: true
+          type: string
+          description: Content to search for
+      responses:
+        '200':
+          description: A list of messages matching the content
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Message'
+
+  /subscriptions:
+    post:
+      summary: Subscribe to a producer
+      tags:
+        - Subscription Service
+      parameters:
+        - in: body
+          name: body
+          description: Subscription data
+          required: true
+          schema:
+            $ref: '#/definitions/Subscription'
+      responses:
+        '201':
+          description: Subscription created successfully
+        '401':
+          description: Unauthorized
+
+    delete:
+      summary: Unsubscribe from a producer
+      tags:
+        - Subscription Service
+      parameters:
+        - in: body
+          name: body
+          description: Subscription data
+          required: true
+          schema:
+            $ref: '#/definitions/Subscription'
+      responses:
+        '204':
+          description: Subscription deleted successfully
+        '401':
+          description: Unauthorized
+
+  /subscriptions/subscribers/{producerId}:
+    get:
+      summary: Get subscribers of a producer
+      tags:
+        - Subscription Service
+      parameters:
+        - name: producerId
+          in: path
+          required: true
+          type: integer
+          description: ID of the producer
+      responses:
+        '200':
+          description: A list of subscribers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '404':
+          description: Producer not found
+
+  /subscriptions/producers/{subscriberId}:
+    get:
+      summary: Get producers subscribed by a user
+      tags:
+        - Subscription Service
+      parameters:
+        - name: subscriberId
+          in: path
+          required: true
+          type: integer
+          description: ID of the subscriber
+      responses:
+        '200':
+          description: A list of producers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '404':
+          description: Subscriber not found
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+      email:
+        type: string
+      roleOne:
+        type: string
+      roleTwo:
+        type: string
+       
+  SetUserRole:
+    type: object
+    properties:
+      userId:
+        type: integer
+      roleName:
+        type: object
+        properties:
+          roleOne: 
+            type: string
+          roleTwo: 
+            type: string
+
+  UserRegistration:
+    type: object
+    properties:
+      username:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+
+  UserLogin:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+
+  Token:
+    type: object
+    properties:
+      token:
+        type: string
+      userId:
+        type: integer
+      expiresAt:
+        type: string
+        format: date-time
+
+  Message:
+    type: object
+    properties:
+      id:
+        type: integer
+      userId:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+        format: date-time
+
+  Subscription:
+    type: object
+    properties:
+      subscriberId:
+        type: integer
+      producerId:
+        type: integer
